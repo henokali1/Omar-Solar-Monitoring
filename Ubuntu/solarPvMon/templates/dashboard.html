@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+      <!-- Compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <title>Dashboard</title>
+      <style>
+         .content {
+         position: absolute;
+         left: 50%;
+         top: 50%;
+         -webkit-transform: translate(-50%, -50%);
+         transform: translate(-50%, -50%);
+         }
+      </style>
+   </head>
+   <body>
+      <div class="container">
+         <br>
+         <a id="strm" href="http://raspberrypi.local/stream" class="btn">Live Video Stream</a>   
+      </div>
+      <div class="container">
+         <h4 class="center"><b>Wireless Monitoring System for PV Generators</b></h4>
+         <div class="card darken-1 z-depth-5" style="padding: 20px; border-style: solid;">
+            <div>
+               <div class="row">
+                  <b><span id="device_stat"></span></b>
+               </div>
+            </div>
+            <h5><b><span style="color: green;" id="stat">Connecting...</span></b></h5>
+            <h5>Output Power: <b><span id="pw">-</span></b></h5>
+            <h5>Load Current: <b><span id="lc">-</span></b></h5>
+            <!-- <h5>Charging Voltage: <b><span><span id="cv">-</span></span></b></h5> -->
+            <h5>Battery Voltage: <b><span><span id="bv">-</span></span></b></h5>
+            <h5>Battery Percentage: <b><span><span id="bp">-</span></span></b></h5>
+         </div>
+      </div>
+      <script>
+         lattest_data_url = '/lattest_data'
+         function executeQuery() {
+           $.getJSON( lattest_data_url, function(data) {
+                   console.log(data)
+                 //   offline = data['pwr'] == ''
+                 //   if(offline){
+                 //       document.getElementById('device_stat').innerText = 'Device Offline'
+                 //   } else {
+                 //     document.getElementById('device_stat').innerText = ''
+                 //   }
+                 if(data['data_exp']){
+                     document.getElementById('stat').innerText = `Device Offline`
+                     document.getElementById('stat').style.color = 'red'
+                     document.getElementById('strm').classList.add("disabled");
+                     // document.getElementById('cc').innerText = `-`
+                     document.getElementById('lc').innerText = `-`
+                     // document.getElementById('cv').innerText = `-`
+                     document.getElementById('bv').innerText = `-`
+                     document.getElementById('bp').innerText = `-`
+                     document.getElementById('pw').innerText = `-`
+                 } else {
+                     document.getElementById('stat').innerText = ``
+                     // document.getElementById('cc').innerText = `${data['cc']} A`
+                     document.getElementById('lc').innerText = `${data['lc']} A`
+                     document.getElementById('pw').innerText = `${data['pw']} W`
+                     // document.getElementById('cv').innerText = `${data['cv']} V`
+                     document.getElementById('bv').innerText = `${data['bv']} V`
+                     document.getElementById('bp').innerText = `${data['bp']} %`
+                     // document.getElementById('pw').inerText = `${data['pw']} W`
+                 }
+
+                 if(data['ip_exp']){
+                     document.getElementById('strm').classList.add("disabled");
+                    console.log('ip expired')
+                 } else {
+                  document.getElementById('strm').classList.remove('disabled')
+                    document.getElementById('strm').href = `http://${data['ip']}/stream`
+                 }
+               })
+           setTimeout(executeQuery, 1000); // you could choose not to continue on failure...
+         }
+         
+         $(document).ready(function() {
+         // run the first time; all subsequent calls will take care of themselves
+         setTimeout(executeQuery, 1000);
+         });
+      </script>
+   </body>
+</html>
